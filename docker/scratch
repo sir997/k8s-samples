@@ -1,0 +1,19 @@
+# 第一阶段：构建二进制文件
+FROM golang:1.16 AS build
+
+WORKDIR /app
+
+# 将源代码复制到工作目录
+COPY . .
+
+# 构建二进制文件
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o myapp .
+
+# 第二阶段：构建Scratch镜像
+FROM scratch
+
+# 将二进制文件复制到Scratch镜像中
+COPY --from=build /app/myapp /myapp
+
+# 设置执行权限并指定入口点
+ENTRYPOINT ["/myapp"]
